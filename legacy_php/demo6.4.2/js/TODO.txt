@@ -1,0 +1,58 @@
+
+
+
+/* to-do
+* dayLight time shift!! upostevaj !! - preko mreze uporabi NTP za pravilen cas in bo vse ok!
+*
+* - global json settings (to reset/refresh page, global control)
+* - add colors on vertical timeline ..= as intervals .. if room free/reserved
+* -
+* - 1dan v naprej podatke si zapomni
+* - ldap , proxy .. mora biti backup, round-robin...!!!
+* - pisi za licence za android app
+* - barvaj vertikalno casovno skalo prosto/zasedeno
+*
+* - text resize na desni strani ... omeji kvader kamor se lahko  razsiri  tekst
+*
+* - code cleanup
+* */
+
+naj bo prva stran .PHP in ne .html .. v primeru, da se v prihodnje nadgradi
+
+- hard refresh page at midnight
+   - if no internet clean display and return error message
+
+- config file for
+  force reload web page - as option after new web page code uploaded
+  site in maintainance mode - message or black screen
+  soft power saver mode - black screen -- specify start stop times, or  before first abd after last Reservation (30 min prej/potem )   = izpisi "Power saver mode. No reservations of classroom at the moment. Current date and time  xxcxcxcxc"
+
+- one day in advance data load ?
+
+- on logo click or bottom create by= about  page ... o meni :D
+    + device id = cookie ,  deviceID= device14325  (5 rand stevilk?!)
+
+
+
+
+- resize text to fit div size  [partial] on main left side ok... right side not yet
+
+- "next": null, !! pazi.. pri vseh ajax moras itiskozi rekurzivno
+
+- !uredi reverse proxy preko mod_proxy namesto data.php!!  .. ker cusom scripta ne vraca status razlicen od 200 ..
+- login podatke za LDAP spremeni  !zamenjaj uporabniske podatke za specializiranega uporabnika
+
+/////////////LDAP.php
+
+- ![zacasno ok, spremeni ce imas boljsi predlog] precisti input!!!!
+- blokiraj zunanje poizvedbe.. dovoli le poizvedbe iz uredne domene/strani .
+- dodaj redundent ldap streznik.. ali preko load balance proxy-ja
+
+- !zamenjaj uporabniske podatke za specializiranega uporabnika
+
+-[ok] v json "error":"none" ali " izpisi napake"
+///////////
+
+
+OK
+- ce je termin prost vrini enega fake praznega..
