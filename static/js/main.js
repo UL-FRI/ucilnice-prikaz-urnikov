@@ -49,7 +49,7 @@ var dataTimeOffset;
 var pageUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/"));
 var indexFileUrl = location.protocol + "//" + location.hostname + location.pathname; //"http://cid.fri1.uni-lj.si/demo6/index.html"
 var originalDataApiUrl = "https://urnik.fri.uni-lj.si/reservations/";
-var dataUrl = "https://urnik.fri.uni-lj.si/reservations/";
+var dataUrl = "https://rezervacije.fri.uni-lj.si/";
 
 var refreshDataInterval = 5 * 60 * 1000; //every 60s x 5= 5min   |  page -> data.php -> data server
 var refreshUIInterval = 30 * 1000; //every 30s
