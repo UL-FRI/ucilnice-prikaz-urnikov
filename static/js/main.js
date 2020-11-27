@@ -55,7 +55,7 @@ var refreshDataInterval = 5 * 60 * 1000; //every 60s x 5= 5min   |  page -> data
 var refreshUIInterval = 30 * 1000; //every 30s
 var refreshFullPageInterval= 6 * 60 * 60 * 1000; // every 6 hours 
 
-var ajaxTimeout = 2000;//3000; // sets ajax timeout to 2 seconds
+var ajaxTimeout = 20000;//3000; // sets ajax timeout to 20 seconds
 
 var roomsById = Object.create(null);//= {};;
 var roomsBySlug = Object.create(null);//= {};;
