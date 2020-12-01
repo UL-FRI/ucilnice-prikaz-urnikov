@@ -24,6 +24,7 @@
 //!will cause auto reload page on all devices - can cause infinity reload loop if not set correctly!!
 
 var selectedRoom;
+var selectedRoomSlug;
 var selectedDate;
 var selectedTime;
 var urlTimeSet = false;
@@ -35,7 +36,6 @@ var dataReservations_tmp; // new attempt to cennect to server, if anything ok th
 //var tomorrowDT = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1);
 
 var currentDT; // =date or based on url parameters
-var lastSuccessfulServerConnectionTime;  //streznik Strani //TODO!! not yet implemented  // if more than xx seconde/minutes then prompt offline mode error
 var lastSuccessfulDataServerConnectionTime; // Urnik API
 var dataServerFailedConnAttempts_max=3; // SHOW ERROR  old data  ... refreshDataInterval_showPageErrorAfterNfailedAttempts
 var dataServerFailedConnAttempts_counter=0; // ... till refreshDataInterval_showPageErrorAfterNfailedAttempts refreshDataInterval_counterOfFailedConnAttempts
@@ -50,6 +50,8 @@ var pageUrl = window.location.origin + window.location.pathname.substring(0, win
 var indexFileUrl = location.protocol + "//" + location.hostname + location.pathname; //"http://cid.fri1.uni-lj.si/demo6/index.html"
 var originalDataApiUrl = "https://urnik.fri.uni-lj.si/reservations/";
 var dataUrl = "https://rezervacije.fri.uni-lj.si/";
+var classroomsUrl = dataUrl + "sets/rezervacije_fri/types/classroom/reservables/?format=json";
+var teachersUrl = dataUrl + "sets/rezervacije_fri/types/teacher/reservables/?format=json";
 
 var refreshDataInterval = 5 * 60 * 1000; //every 60s x 5= 5min   |  page -> data.php -> data server
 var refreshUIInterval = 30 * 1000; //every 30s
@@ -57,8 +59,8 @@ var refreshFullPageInterval= 6 * 60 * 60 * 1000; // every 6 hours
 
 var ajaxTimeout = 20000;//3000; // sets ajax timeout to 20 seconds
 
-var roomsById = Object.create(null);//= {};;
 var roomsBySlug = Object.create(null);//= {};;
+var reservablesById = Object.create(null);
 
 var status_dataServer = false;
 var status_pageServer = false;
@@ -67,7 +69,6 @@ var dataCache_tmp = Object.create(null);//= {};  // clean at least once a day ! 
 
 //### INIT ###
 $(document).ready(function () {
-    lastSuccessfulServerConnectionTime = new Date();
     lastSuccessfulDataServerConnectionTime = new Date();
 
     //// get DATE
@@ -101,53 +102,44 @@ $(document).ready(function () {
     //via Url atribut  !! url attribut overwrites if not empty !!
 
 
-    var selectedRoom_slug = getURLParameter('room');
-    var selectedRoom_id = getURLParameter('room_id');
-    loadClassrooms();
-    
-    selectedRoom = roomsById[parseInt(selectedRoom_id)];
-    if (selectedRoom == null){
-        selectedRoom = roomsBySlug[selectedRoom_slug];
-    }
-    if (selectedRoom == null) { // show list on posssible Rooms and finish script !!!!!!!!
-        setInterval(loadAndShowAllClassrooms, refreshUIInterval); //try to query (multipletimes) until you get data
-        showClassrooms();
-    } else {
+    currentDT = new Date(new Date(selectedDate + "T" + selectedTime).getTime() + dataTimeOffset);
+    selectedRoomSlug = getURLParameter('room');
 
-        setInterval(reloadPage, refreshFullPageInterval);
+    setInterval(reloadPage, refreshFullPageInterval);
 
         //  refresh Data & UI periodically
-        setInterval(refreshData, refreshDataInterval);
-        setInterval(refreshUI, refreshUIInterval);
+    setInterval(refreshData, refreshDataInterval);
+    setInterval(showClassroomsOrUI, refreshUIInterval);
 
-        //first time load manually
-        refreshUI();//sync
-        refreshData();//async
-        refreshUI();
-    }
-
+    refreshData();
 });//end init
 
 
 
 //###  ESSENTIAL functions ###//
 
-function reloadPage(){
-    location.reload(true);//(true);         //FORCE PAGE RELOAD if app version changed!!
+function showClassroomsOrUI(){
+    if (selectedRoom == null){
+        showClassrooms();
+    } else {
+        refreshUI();
+    }
 }
 
-function loadAndShowAllClassrooms() { // only if no room selected
-    loadClassrooms();
-    showClassrooms();
+function reloadPage(){
+    location.reload(true);//(true);         //FORCE PAGE RELOAD if app version changed!!
 }
 
 
 function refreshData() {
     // refresh room name
-    if (selectedRoom != null) {
-        selectedRoom = getDataFromCache(selectedRoom.id,getED_ReservableByID ); 
-    }
-    loadReservations();
+    loadReservables(function(){
+        if (selectedRoom != null){
+            loadReservations(showClassroomsOrUI);
+        } else {
+            showClassroomsOrUI();
+        }
+    });
 }
 
 
@@ -168,15 +160,8 @@ function refreshUI() {
     var currentDTFormat = ('0' + currentDT.getDate()).slice(-2) + "/" + ('0' + (currentDT.getMonth() + 1)).slice(-2) + "/" + currentDT.getFullYear() + " " + ('0' + currentDT.getHours()).slice(-2) + ":" + ('0' + currentDT.getMinutes()).slice(-2);//+ ":" + ('0' + currentDT.getSeconds()).slice(-2);
     $('#currentDateAndTime').html(currentDTFormat);
 
-    // delete expired delete  //!! CLEAN OLD DATA!!!!!
-    if (expirationOfData_DT == null) {
-        expirationOfData_DT = currentDT;
-    }
-    if (compareDates(expirationOfData_DT, currentDT) <= 0) {
-        dataReservations = null;
-        dataCache_tmp = {}; // clean cached data
-
 //        $('#message_errorData').html('<i  class="mdi-image-flash-on"></i>' + "Motnje pri pridobivanju podatkov -  zaradi omrežja ali podatkovnega strežnika.");//ajax napaka: fail, data refresh! --Težave pri pridobivanju podatkov - motnje zaradi omrežja ali del na strežniku. V tem času podatki lahko niso točni! Podatki od
+    if (dataReservations == null){
         $('#message_errorData').html('<i  class="mdi-image-flash-on"></i>' + "Motnje pri pridobivanju podatkov -  zaradi omrežja ali del na strežniku. ");
 
         $('#message_errorData').show();
@@ -188,7 +173,7 @@ function refreshUI() {
         //show time table
         $('#work').show();
         $('#loading').hide();
-        rebuildUI(currentDT);
+        rebuildUI();
 
     } else {
         //$('#logo-container').html("Room info loading...");
@@ -202,14 +187,26 @@ function refreshUI() {
 
 
 //###  SUB-ESSENTIAL functions ###//
-function loadClassrooms(){
-    var urlGDOC = dataUrl + "sets/rezervacije_fri/types/classroom/reservables/?format=json";
+function loadReservables(done_fn){
     //getExternalData_UrnikAPI_AllClassrooms_IDsAndNames_sync(urlGDOC);
-    var rooms = getED_AllClassroms(urlGDOC); //if null == error
-    rooms.forEach(room => {
-        roomsById[room.id] = room;
-        roomsBySlug[room.slug] = room;
-    })
+    var tmp = new Array();
+    rooms_done_callback = function(rooms){
+        rooms.forEach(room => {
+            roomsBySlug[room.slug] = room;
+            reservablesById[room.id] = room;
+            if (room.slug == selectedRoomSlug){
+                selectedRoom = room;
+            }
+        });
+        teachers_done_callback = function(teachers){
+            teachers.forEach(teacher => {
+                reservablesById[teacher.id] = teacher;
+            });
+            done_fn();
+        }
+        getExternalData_UrnikApi_MultiObjects_Recursive(teachersUrl, teachers_done_callback, tmp);
+    }
+    getExternalData_UrnikApi_MultiObjects_Recursive(classroomsUrl, rooms_done_callback, tmp);
 }
 
 function showClassrooms() {
@@ -229,7 +226,7 @@ function showClassrooms() {
 }
 
 
-function rebuildUI(currentDT) {
+function rebuildUI() {
     var checkedReservation_isFree = false;
     var myULhtml = "";
     var count = 1;
@@ -264,7 +261,7 @@ function rebuildUI(currentDT) {
                 //vstavi le aktualnega
                 //instert fake as trenuten termin
 
-                myULhtml += nextTimeLineElement(getFakeLineElement(lastEndTimeText, dataReservations[i].start), count, currentDT, true);
+                myULhtml += nextTimeLineElement(getFakeLineElement(lastEndTimeText, dataReservations[i].start), count, true);
 
                 count++;
                 //insert next termin
@@ -275,13 +272,13 @@ function rebuildUI(currentDT) {
             lastEndTimeText = dataReservations[i].end;
             lastEndTime = new Date(new Date(dataReservations[i].end).getTime() + dataTimeOffset);
             //vstavi praznega + aktualnega
-            myULhtml += nextTimeLineElement(item, count, currentDT, false);
+            myULhtml += nextTimeLineElement(item, count, false);
 
             if (i == dataReservations.length - 1 && lastEndTime < new Date(new Date(dayTimeMax).getTime() + dataTimeOffset)) { //fake na koncu
                 count++;
                 //insert fake termin
 
-                myULhtml += nextTimeLineElement(getFakeLineElement(lastEndTimeText, dayTimeMax), count, currentDT, true);
+                myULhtml += nextTimeLineElement(getFakeLineElement(lastEndTimeText, dayTimeMax), count, true);
                 //checkedReservation_isFree = true;
 
             }
@@ -359,7 +356,7 @@ function rebuildUI(currentDT) {
 }
 
 
-function nextTimeLineElement(item, count, currentDT, isFreeReservation) {
+function nextTimeLineElement(item, count, isFreeReservation) {
 
     var startDT = new Date(new Date(item.start).getTime() + dataTimeOffset);
     var endDT = new Date(new Date(item.end).getTime() + dataTimeOffset);
@@ -391,76 +388,59 @@ function getFakeLineElement(startDT, endDT) {
 ////
 
 
-function loadReservations() { //loadReservations new
-
+function loadReservations(done_fn) { //loadReservations new
     var urlGDOC = dataUrl + 'reservations/?start=' + selectedDate + '%2000:00&end=' + selectedDate + '%2023:59&reservables=' + selectedRoom.id + '&format=json';
-    var data;
-    var dataLoadedOK = true;
-    try {
-        data = getExternalData_UrnikApi_MultiObjects_Recursive_sync(urlGDOC);
-    } catch (e) { // if software exeption thrown
-        dataLoadedOK = false;
+    var data = new Array();
 
-        dataServerFailedConnAttempts_counter=Math.min(dataServerFailedConnAttempts_counter+1,dataServerFailedConnAttempts_max);
-
-        if( dataServerFailedConnAttempts_counter >= dataServerFailedConnAttempts_max){
-            var d = lastSuccessfulDataServerConnectionTime;
-            var sDate = ('0' + d.getDate()).slice(-2) + "/" + ('0' + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();  //selectedDate;//d.getFullYear() + "-" +  ('0' + (d.getMonth() + 1)).slice(-2) + "-" + ('0' + d.getDate()).slice(-2) ;
-            var sTime = ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2);//selectedTime;//('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2) ;//+ ":" + ('0' + d.getSeconds()).slice(-2);;
-
-            $('#message_errorData').html('<i  class="mdi-image-flash-on"></i>' + "Motnje pri pridobivanju podatkov -  zaradi omrežja ali del na strežniku. V tem času podatki lahko niso točni! Podatki od " + sDate + " " + sTime);//ajax napaka: fail, data refresh! --Težave pri pridobivanju podatkov - motnje zaradi omrežja ali del na strežniku. V tem času podatki lahko niso točni! Podatki od
-            // --niso več aktualni ---minut oz sekund od zadnje osvezitve ... Težave pri pridobivanju podatkov. Možne težave z omrežjem ali potekajo dela na strežniku.
-            $('#message_errorData').show();
-            $('#message_errorData').autoSizr();
-
-        }
-
+    // delete expired delete  //!! CLEAN OLD DATA!!!!!
+    if (expirationOfData_DT == null) {
+        expirationOfData_DT = currentDT;
+    }
+    if (compareDates(expirationOfData_DT, currentDT) <= 0) {
+        dataReservations = null;
+        dataCache_tmp = {}; // clean cached data
     }
 
 
-    if (dataLoadedOK) {
+    done_callback = function(data){
+        dataReservations_tmp = data;
 
-        try {
-            dataReservations_tmp = data;
+        //SORT!!!!!!!
+        dataReservations_tmp.sort(comp);
 
-            //SORT!!!!!!!
-            dataReservations_tmp.sort(comp);
+        //convert all  id numbers to names
+        $.each(dataReservations_tmp, function (i, item) {
+            var teachersN = 0, roomsN = 0;
+            var teachers = "", rooms = "";
 
-            //convert all  id numbers to names
-            $.each(dataReservations_tmp, function (i, item) {
-                var teachersN = 0, roomsN = 0;
-                var teachers = "", rooms = "";
+            dataReservations_tmp[i].reason = textClean(dataReservations_tmp[i].reason).replace(/\(/g, ' \(').replace(/'/g, '');
 
-                dataReservations_tmp[i].reason = textClean(dataReservations_tmp[i].reason).replace(/\(/g, ' \(').replace(/'/g, '');
+            // for rooms/teachers
+            $.each(item.reservables, function (j, item) {
+                var reservable = reservablesById[item];
+                if (reservable != null && reservable.type === "teacher") {
+                    if (teachersN > 0) {
+                        teachers += "; ";
+                    }
+                    teachersN++;
+                    teachers += textClean(reservable.name);
+                } else if (reservable != null && reservable.type === "classroom") {
+                    if (roomsN > 0) {
+                        rooms += "; ";
+                    }
+                    roomsN++;
+                    rooms += textClean(reservable.slug);
+                } else {
+                }   //skupine = groups .. ne rabim
 
-                // for rooms/teachers
-                $.each(item.reservables, function (j, item) {
-                    var reservable = getDataFromCache(item, getED_ReservableByID);
-                    if (reservable != null && reservable.type === "teacher") {
-                        if (teachersN > 0) {
-                            teachers += "; ";
-                        }
-                        teachersN++;
-                        teachers += textClean(reservable.name);
-                    } else if (reservable != null && reservable.type === "classroom") {
-                        if (roomsN > 0) {
-                            rooms += "; ";
-                        }
-                        roomsN++;
-                        rooms += textClean(reservable.slug);
-                    } else {
-                    }   //skupine = groups .. ne rabim
-
-                });
-
-                dataReservations_tmp[i].roomsText = rooms;   //..shrani kot nov parameter   //requirementsText =rooms
-                dataReservations_tmp[i].teachersText = (teachers === "" ? "-" : teachers);// teachers; ///..shrani  //reservablesText = teachers
-                //"-" == dekanat default
             });
 
-
-            dataReservations = jQuery.extend(true, [], dataReservations_tmp);//deep copy//  (true, {}, dataReservations_tmp)
-
+            dataReservations_tmp[i].roomsText = rooms;   //..shrani kot nov parameter   //requirementsText =rooms
+            dataReservations_tmp[i].teachersText = (teachers === "" ? "-" : teachers);// teachers; ///..shrani  //reservablesText = teachers
+            //"-" == dekanat default
+        });
+        dataReservations = jQuery.extend(true, [], dataReservations_tmp);//deep copy//  (true, {}, dataReservations_tmp)
+        try {
             $('#message_errorData').html("");
             $('#message_errorData').hide();
             //{"count": 0, "next": null, "previous": null, "results": []}   // ce je prazno https://urnik.fri.uni-lj.si/reservations/reservations/?start=2016-09-27%2023:00&end=2016-09-27%2023:40&reservables=3155&format=json
@@ -474,10 +454,27 @@ function loadReservations() { //loadReservations new
             $('#message_errorData').html('<i  class="mdi-image-flash-on"></i>' + "Težave pri procesiranju podatkov, prosimo obvestite skrbnika!");
             $('#message_errorData').show();
         }
+        done_fn();
+    };
+    getExternalData_UrnikApi_MultiObjects_Recursive(urlGDOC, done_callback, data);
+}
+
+function onDataRecvFail(){
+    dataServerFailedConnAttempts_counter=dataServerFailedConnAttempts_counter+1;
+
+    if( dataServerFailedConnAttempts_counter >= dataServerFailedConnAttempts_max){
+        var d = lastSuccessfulDataServerConnectionTime;
+        var sDate = ('0' + d.getDate()).slice(-2) + "/" + ('0' + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();  //selectedDate;//d.getFullYear() + "-" +  ('0' + (d.getMonth() + 1)).slice(-2) + "-" + ('0' + d.getDate()).slice(-2) ;
+        var sTime = ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2);//selectedTime;//('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2) ;//+ ":" + ('0' + d.getSeconds()).slice(-2);;
+
+        $('#message_errorData').html('<i  class="mdi-image-flash-on"></i>' + "Motnje pri pridobivanju podatkov -  zaradi omrežja ali del na strežniku. V tem času podatki lahko niso točni! Podatki od " + sDate + " " + sTime);//ajax napaka: fail, data refresh! --Težave pri pridobivanju podatkov - motnje zaradi omrežja ali del na strežniku. V tem času podatki lahko niso točni! Podatki od
+        // --niso več aktualni ---minut oz sekund od zadnje osvezitve ... Težave pri pridobivanju podatkov. Možne težave z omrežjem ali potekajo dela na strežniku.
+        $('#message_errorData').show();
+        $('#message_errorData').autoSizr();
+
     }
 
 }
-
 
 //### DATA API HELPER func. ###//
 
@@ -489,14 +486,9 @@ function getED_ReservableByID(resID) { // same for organizer/room/group
 
 
 
-function getED_AllClassroms(url) { // return as hashTable
+function getED_AllClassrooms(url) { // return as hashTable
     var url = dataUrl + "sets/rezervacije_fri/types/classroom/reservables/?format=json";// //'reservables/' + sifra + '/?format=json';
     //  var url;
-    try {
-        return getExternalData_UrnikApi_MultiObjects_Recursive_sync(url);
-    } catch (e) {
-        data = null; // throw "Oh no! Can not connect to server or  strange data!";
-    }
 }
 
 
@@ -510,7 +502,7 @@ function getExternalData_singleObjectByURL_sync(urlGDOC) {   //   var urlGDOC = 
     $.ajax({
         timeout: ajaxTimeout, //  timeout
         url: urlGDOC,
-        async: false,//!!
+        async: true,//!!
         dataType: "json"
     }).done(function (data) {
         try {
@@ -525,34 +517,24 @@ function getExternalData_singleObjectByURL_sync(urlGDOC) {   //   var urlGDOC = 
 }
 
 //specific to UrnikApi - data in multipage model
-function getExternalData_UrnikApi_MultiObjects_Recursive_sync(url) {
-
-    var response = Object.create(null);//= {};
+function getExternalData_UrnikApi_MultiObjects_Recursive(url, done_fn, dest_array) {
     $.ajax({
         timeout: ajaxTimeout, // sets timeout
         url: url,
-        async: false,//!!
+        async: true,//!!
         dataType: "json"
     }).done(function (data) {
-        try {
-            if (data.count >= 0) {
-                response = data.results;//response.concat( data.results  );
-                if (data.next != null) {  //RECURSIVELY
-                    var nextDataUrl_viaProxy = data.next.replace(originalDataApiUrl, dataUrl); // change https://urnik.fri.uni-lj.si/reservations/ to owr server domain/data.php/...
-                    var tmp = getExternalData_UrnikApi_MultiObjects_Recursive_sync(nextDataUrl_viaProxy); // next : "https://urnik.fri.uni-lj.si/reservations/sets/rezervacije_fri/types/classroom/reservables/?page=2&format=json"
-                    response = response.concat(tmp);
-                }
-            } else { //return nothing ?!
-            }
-        } catch (e) {
-            throw "Oh no! Can not connect to server or  strange data!";
+        dest_array = dest_array.concat(data.results);//response.concat( data.results  );
+        if (data.next != null) {  //RECURSIVELY
+            var nextDataUrl_viaProxy = data.next.replace(originalDataApiUrl, dataUrl); // change https://urnik.fri.uni-lj.si/reservations/ to owr server domain/data.php/...
+            getExternalData_UrnikApi_MultiObjects_Recursive(nextDataUrl_viaProxy, done_fn, dest_array);
+        } else {
+            done_fn(dest_array);
         }
-
     }).fail(function () {
-        throw "Oh no! Can not connect to server  !";
+        onDataRecvFail();
     }).always(function () {        //
     });
-    return response;
 }
 
 
