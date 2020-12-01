@@ -191,7 +191,7 @@ function loadReservables(done_fn){
     //getExternalData_UrnikAPI_AllClassrooms_IDsAndNames_sync(urlGDOC);
     var tmp = new Array();
     rooms_done_callback = function(rooms){
-        rooms.forEach(room => {
+        $.each(rooms, function(i, room){
             roomsBySlug[room.slug] = room;
             reservablesById[room.id] = room;
             if (room.slug == selectedRoomSlug){
@@ -199,7 +199,7 @@ function loadReservables(done_fn){
             }
         });
         teachers_done_callback = function(teachers){
-            teachers.forEach(teacher => {
+            $.each(teachers, function(i, teacher){
                 reservablesById[teacher.id] = teacher;
             });
             done_fn();
