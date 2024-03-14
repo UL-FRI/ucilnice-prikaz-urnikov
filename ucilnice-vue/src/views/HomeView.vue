@@ -1,0 +1,55 @@
+<script setup lang="ts">
+import { onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import CurrentSubject from '../components/CurrentSubject.vue';
+import FriLogo from '../components/FriLogo.vue';
+import PageFooter from '../components/PageFooter.vue';
+import SideTimeline from '../components/SideTimeline.vue';
+import { useClassroomStore } from '../stores/classroom';
+
+const route = useRoute();
+const router = useRouter();
+const classroomStore = useClassroomStore();
+
+onMounted(() => {
+  const { room } = route.query;
+
+  const classroom = room?.toString();
+
+  if (classroom) {
+    classroomStore.setCurrentClassroomBySlug(classroom);
+  } else {
+    router.push({ name: 'SelectClassroom' });
+  }
+});
+</script>
+
+<template>
+  <div class="page-wrapper">
+    <main>
+      <FriLogo />
+      <CurrentSubject />
+      <PageFooter />
+    </main>
+    <SideTimeline />
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.page-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 0 2rem 4rem;
+  height: 100vh;
+}
+main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  overflow: hidden;
+  padding-right: 4rem;
+}
+</style>
