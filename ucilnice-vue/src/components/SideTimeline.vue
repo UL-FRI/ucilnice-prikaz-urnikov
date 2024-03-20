@@ -147,7 +147,7 @@ watch([currentReservationIndex, currentDate, elements], recalculateBar);
 .timeline-current-line {
   $border-width: 0.375rem;
   min-width: $border-width;
-  min-height: 100px;
+  min-height: 6rem;
   position: absolute;
   background-color: $primary;
   transition: 0.3s;

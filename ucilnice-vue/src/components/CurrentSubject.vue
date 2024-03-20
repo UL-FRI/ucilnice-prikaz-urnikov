@@ -94,7 +94,7 @@ watch(currentReservation, async () => {
 @keyframes fade-in {
   from {
     opacity: 0;
-    margin-top: 200px;
+    margin-top: 12rem;
   }
   to {
     opacity: 1;
