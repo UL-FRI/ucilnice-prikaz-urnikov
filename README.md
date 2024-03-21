@@ -23,6 +23,9 @@ vmesnik, ki se povezuje na strežnik LDAP fakultete in prevaja uporabniška imen
 Ker prikaz urnikov lahko teče na istem strežniku kot rezervacije, dolga imena učiteljev pa lahko popravimo,
 smo velik del funkcionalnosti originalne aplikacije izrezali. Nastale statične strani so sedaj v imeniku static.
 
+## ucilnice_vue
+
+Z letom 2024 Univerza v Ljubljani uporablja novo grafično podobo. Aplikacija je v ta namen prenovljena in napisana z uporabo `Vue.js`. 
 
 # Licensing
 
