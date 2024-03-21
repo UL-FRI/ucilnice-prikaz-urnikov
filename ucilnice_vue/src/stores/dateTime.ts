@@ -9,10 +9,13 @@ export const useDateTimeStore = defineStore('dateTime', () => {
   const themeStore = useThemeStore();
   const { theme } = storeToRefs(themeStore);
 
-  // const getCurrentTime = () => new Date();
+  const simulationEnabled = ref(false);
+  const simulationStartTime = ref(new Date().getTime());
 
   const getCurrentTime = () =>
-    new Date(new Date(2024, 2, 14, 6, 30).getTime() + dateTimeSimulatorCount.value);
+    simulationEnabled.value
+      ? new Date(simulationStartTime.value + dateTimeSimulatorCount.value)
+      : new Date();
 
   const currentDateTime = ref(getCurrentTime());
 
@@ -89,6 +92,10 @@ export const useDateTimeStore = defineStore('dateTime', () => {
     return `${formatTime(from)} (${shortDayOfWeek(from)}) - ${formatTime(to)} (${shortDayOfWeek(to)})`;
   };
 
+  const enableSimulation = () => {
+    simulationEnabled.value = true;
+  };
+
   return {
     currentDateTime,
     currentDate,
@@ -96,5 +103,6 @@ export const useDateTimeStore = defineStore('dateTime', () => {
     formatLongDate,
     millisecondsBetween,
     fromToText,
+    enableSimulation,
   };
 });

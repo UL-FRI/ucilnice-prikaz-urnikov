@@ -6,21 +6,28 @@ import FriLogo from '../components/FriLogo.vue';
 import PageFooter from '../components/PageFooter.vue';
 import SideTimeline from '../components/SideTimeline.vue';
 import { useClassroomStore } from '../stores/classroom';
+import { useDateTimeStore } from '@/stores/dateTime';
 
 const route = useRoute();
 const router = useRouter();
 const classroomStore = useClassroomStore();
+const dateTimeStore = useDateTimeStore();
 
 onMounted(() => {
-  const { room } = route.query;
+  const { room, simulate } = route.query;
 
   const classroom = room?.toString();
 
-  if (classroom) {
-    classroomStore.setCurrentClassroomBySlug(classroom);
-  } else {
+  if (!classroom) {
     router.push({ name: 'SelectClassroom' });
+    return;
   }
+
+  if (simulate) {
+    dateTimeStore.enableSimulation();
+  }
+
+  classroomStore.setCurrentClassroomBySlug(classroom);
 });
 </script>
 
