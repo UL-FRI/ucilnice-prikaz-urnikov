@@ -1,6 +1,8 @@
+import { defineStore, storeToRefs } from 'pinia';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useConfigurationStore } from './configuration';
 import api from '@/helpers/api';
-import { defineStore } from 'pinia';
-import { computed, onMounted, ref } from 'vue';
+import type { ReservationsApiClassroomsResponse } from '@/helpers/api.d';
 
 export interface Classroom {
   id: number;
@@ -8,41 +10,32 @@ export interface Classroom {
   slug?: string;
 }
 
-export interface ReservationsApiClassroomsResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: ReservationsApiClassroom[];
-}
-
-export interface ReservationsApiClassroom {
-  id: number;
-  slug: string;
-  type: string;
-  name: string;
-  nresources_set: ReservationsApiNresourcesSet[];
-}
-
-export interface ReservationsApiNresourcesSet {
-  id: number;
-  resource: ReservationsApiResource;
-  n: number;
-}
-
-export interface ReservationsApiResource {
-  id: number;
-  slug: string;
-  type: string;
-  name: string;
-}
-
 export const useClassroomStore = defineStore('classroomStore', () => {
   const classrooms = ref<Classroom[]>([]);
 
   const currentClassroomSlug = ref<string | null>(null);
 
+  const configurationStore = useConfigurationStore();
+  const { lastConfigurationUpdate, classroomsRefreshFrequency } = storeToRefs(configurationStore);
+
+  let refreshInterval: number | null = null;
+
   onMounted(async () => {
     await fetchData();
+    setRefreshInterval();
+  });
+
+  const setRefreshInterval = () => {
+    if (refreshInterval !== null) {
+      clearInterval(refreshInterval);
+    }
+
+    refreshInterval = setInterval(fetchData, classroomsRefreshFrequency.value * 60 * 1000);
+  };
+
+  watch(lastConfigurationUpdate, async () => {
+    await fetchData();
+    setRefreshInterval();
   });
 
   const setCurrentClassroomBySlug = (slug: string) => {
@@ -55,21 +48,26 @@ export const useClassroomStore = defineStore('classroomStore', () => {
 
   const currentClassroomId = computed(() => currentClassroom.value?.id);
 
-  const fetchData = async () => {
-    classrooms.value = [];
+  watch(lastConfigurationUpdate, async () => {
+    await fetchData();
+  });
 
+  const fetchData = async () => {
     let nextPageUrl: string | null =
       '/sets/rezervacije_fri/types/classroom/reservables/?format=json';
 
+    const newData: Classroom[] = [];
     while (nextPageUrl !== null) {
       const response = await api.get(nextPageUrl);
       const data = response.data as ReservationsApiClassroomsResponse;
       nextPageUrl = data.next;
 
       data.results.forEach((classroom) => {
-        classrooms.value.push({ id: classroom.id, name: classroom.name, slug: classroom.slug });
+        newData.push({ id: classroom.id, name: classroom.name, slug: classroom.slug });
       });
     }
+
+    classrooms.value = newData;
   };
 
   return {

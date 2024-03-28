@@ -1,36 +1,42 @@
-import api from '@/helpers/api';
-import { defineStore } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { defineStore, storeToRefs } from 'pinia';
+import { onMounted, ref, watch } from 'vue';
+import type { ReservationsApiTeachersResponse } from '../helpers/api.d';
+import api from '../helpers/api';
+import { useConfigurationStore } from './configuration';
 
 export interface Teacher {
   id: number;
   name: string;
 }
 
-export interface ReservationsApiTeachersResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: ReservationsApiTeacher[];
-}
-
-export interface ReservationsApiTeacher {
-  id: number;
-  slug: string;
-  type: string;
-  name: string;
-  nresources_set: any[];
-}
-
 export const useTeacherStore = defineStore('teacherStore', () => {
   const teachers = ref<Teacher[]>([]);
 
-  onMounted(() => {
-    fetchData();
+  const configurationStore = useConfigurationStore();
+  const { lastConfigurationUpdate, teachersRefreshFrequency } = storeToRefs(configurationStore);
+
+  let refreshInterval: number | null = null;
+
+  onMounted(async () => {
+    await fetchData();
+    setRefreshInterval();
+  });
+
+  const setRefreshInterval = () => {
+    if (refreshInterval !== null) {
+      clearInterval(refreshInterval);
+    }
+
+    refreshInterval = setInterval(fetchData, teachersRefreshFrequency.value * 60 * 1000);
+  };
+
+  watch(lastConfigurationUpdate, async () => {
+    await fetchData();
+    setRefreshInterval();
   });
 
   const fetchData = async () => {
-    teachers.value = [];
+    const newTeachers: Teacher[] = [];
 
     let nextPageUrl: string | null = '/sets/rezervacije_fri/types/teacher/reservables/?format=json';
 
@@ -39,9 +45,11 @@ export const useTeacherStore = defineStore('teacherStore', () => {
       const data = response.data as ReservationsApiTeachersResponse;
       nextPageUrl = data.next;
       data.results.forEach((teacher) => {
-        teachers.value.push({ id: teacher.id, name: teacher.name });
+        newTeachers.push({ id: teacher.id, name: teacher.name });
       });
     }
+
+    teachers.value = newTeachers;
   };
 
   fetchData();

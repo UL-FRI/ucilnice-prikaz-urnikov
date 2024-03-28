@@ -2,13 +2,15 @@
 import { computed, ref, watch } from 'vue';
 import { useReservationStore } from '@/stores/reservation';
 import { storeToRefs } from 'pinia';
-import constants from '@/constants';
 import { useTeacherStore } from '@/stores/teacher';
 import { useLanguage } from '@/helpers/language';
 import { useDateTimeStore } from '@/stores/dateTime';
+import { useConfigurationStore } from '@/stores/configuration';
+
+const configurationStore = useConfigurationStore();
+const { breakSlug } = storeToRefs(configurationStore);
 
 const dateTimeStore = useDateTimeStore();
-
 const { currentDateTime } = storeToRefs(dateTimeStore);
 
 const reservationStore = useReservationStore();
@@ -17,7 +19,7 @@ const teacherStore = useTeacherStore();
 const { currentReservation, nextReservation } = storeToRefs(reservationStore);
 
 const isBreak = computed(
-  () => currentReservation.value?.subject === constants.breakSlug || !currentReservation.value,
+  () => currentReservation.value?.subject === breakSlug.value || !currentReservation.value,
 );
 
 const timeText = computed(() =>

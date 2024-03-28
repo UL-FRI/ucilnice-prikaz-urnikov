@@ -3,6 +3,8 @@ import { computed } from 'vue';
 import { useClassroomStore } from '@/stores/classroom';
 import { storeToRefs } from 'pinia';
 import { useDateTimeStore } from '@/stores/dateTime';
+import { useReservationStore } from '@/stores/reservation';
+import { DataStatus } from '@/stores/configuration';
 
 const dateTimeStore = useDateTimeStore();
 const { currentDateTime } = storeToRefs(dateTimeStore);
@@ -12,11 +14,15 @@ const currentDate = computed(() => dateTimeStore.formatLongDate(currentDateTime.
 
 const classroomStore = useClassroomStore();
 const { currentClassroom } = storeToRefs(classroomStore);
+
+const reservationStore = useReservationStore();
+const { status } = storeToRefs(reservationStore);
 </script>
 
 <template>
   <div class="footer-wrapper">
     <div class="footer">
+      <div class="error" v-if="status == DataStatus.error">!</div>
       <div class="classroom">{{ currentClassroom?.slug }}</div>
       <div class="datetime">
         <div class="time">{{ currentTime }}</div>
@@ -38,6 +44,11 @@ const { currentClassroom } = storeToRefs(classroomStore);
     display: flex;
     align-items: center;
     color: $gray-dark;
+
+    .error {
+      font-size: 3rem;
+      margin-right: 1rem;
+    }
 
     .classroom {
       font-size: 3rem;
@@ -65,4 +76,3 @@ const { currentClassroom } = storeToRefs(classroomStore);
   }
 }
 </style>
-@/stores/dateTime

@@ -1,5 +1,7 @@
 # ucilnice_vue
 
+Aplikacija je narejena z ogrodjem `Vue.js`. Trenutno je prilagojena za zaslone Full HD ločljivosti (1920x1080).
+
 ## Priprava okolja
 
 ```sh
@@ -28,6 +30,56 @@ docker compose up
 
 Aplikacija je dostopna na naslovu [http://localhost:8080](http://localhost:8080).
 
-Da bi nastavili predavalnico brez ročnega izbora, je potrebno v URL dodati parameter `room`. Primer: [http://localhost:8080?room=P01](http://localhost:8080?room=R01).
+### Dodatne nastavitve
 
-Za lažji ogled delovanja aplikacije skozi čas, je na voljo tudi parameter `simulate`, ki pospeši časovni potek. Primer: [http://localhost:8080?room=P01&simulate=true](http://localhost:8080?room=P01&simulate=true).
+#### Izbor predavalnice
+
+Da bi nastavili predavalnico brez ročnega izbora, je potrebno v URL dodati parameter `room`.
+
+Primer: [http://localhost:8080?room=P01](http://localhost:8080?room=R01).
+
+#### Simulacija
+
+Za lažji ogled delovanja aplikacije skozi čas, je na voljo tudi parameter `simulate`, ki pospeši časovni potek.
+
+Primer: [http://localhost:8080?room=P01&simulate=true](http://localhost:8080?room=P01&simulate=true).
+
+Lahko se tudi nastavi začetni datum in uro podano v ISO 8601 formatu (2024-03-14T09:16). Primer: [http://localhost:8080/?room=PR16&simulate=2024-03-14T09:16](http://localhost:8080/?room=PR16&simulate=2024-03-14T09:16).
+
+Za prilagoditev hitrosti simulacije je na voljo tudi parameter `speed`. Primer: [http://localhost:8080?room=P01&simulate=true&speed=20](http://localhost:8080?room=P01&simulate=true&speed=20).
+
+#### Konfiguracija
+
+Konfiguracija aplikacije se periodično osvežuje iz datoteke `public/configuration.json`, dostopne na naslovu [http://localhost:8080/configuration.json](http://localhost:8080/configuration.json).
+
+Konfiguracija je v obliki JSON objekta. Primer: 
+
+```json
+{
+  "refreshIntervalsInMinutes": {
+    "configuration": 5,
+    "reservations": 5,
+    "teachers": 1440,
+    "classrooms": 1440,
+    "page": 1440
+  },
+  "darkMode": {
+    "start": 1140,
+    "end": 360
+  },
+  "apiUrl": "https://rezervacije.fri.uni-lj.si",
+  "locale": "sl-SI",
+  "beautifyReservations": true
+}
+```
+
+* `refreshIntervalsInMinutes` določa intervale osveževanja posameznih podatkov v minutah. Ključ `page` se nanaša na osveževanje celotne strani.
+
+* `darkMode` določa časovni interval, ko je vklopljen temni način. Čas je podan v minutah od začetka dneva. Za izklop temnega načina nastavite vsaj eno vrednost na `-1`.
+
+* `apiUrl` določa naslov strežnika, s katerega se pridobivajo podatki.
+
+* `locale` določa jezikovno kodo, ki se uporablja za prikazovanje datuma in ure.
+
+* `beautifyReservations` določa, ali se rezervacije prikazujejo v lepši obliki tj. `Programiranje 2 LV` namesto `Programiranje 2(63278)_LV`.
+

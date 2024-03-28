@@ -64,6 +64,8 @@ input {
   border-bottom: 0.2rem solid $gray-light;
   margin-bottom: 2rem;
   outline: none;
+  background: transparent;
+  color: $black;
 }
 
 .grid {

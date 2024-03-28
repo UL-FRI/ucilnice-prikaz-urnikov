@@ -2,13 +2,16 @@
 import { useLanguage } from '@/helpers/language';
 import type { Reservation } from '@/stores/reservation';
 import { computed } from 'vue';
-import constants from '@/constants';
 import { useDateTimeStore } from '@/stores/dateTime';
 import { storeToRefs } from 'pinia';
+import { useConfigurationStore } from '@/stores/configuration';
 
 const props = defineProps<{
   reservation: Reservation;
 }>();
+
+const configurationStore = useConfigurationStore();
+const { breakSlug } = storeToRefs(configurationStore);
 
 const dateTimeStore = useDateTimeStore();
 const { currentDateTime } = storeToRefs(dateTimeStore);
@@ -19,7 +22,7 @@ const timeText = computed(() =>
   dateTimeStore.fromToText(props.reservation.start, props.reservation.end),
 );
 
-const isBreak = computed(() => props.reservation.subject === constants.breakSlug);
+const isBreak = computed(() => props.reservation.subject === breakSlug.value);
 
 const isCurrent = computed(() => {
   return (
@@ -63,7 +66,6 @@ const breakText = computed(() => {
 
 .timeline-item {
   $timeline-line-width: 0.1rem;
-
 
   padding-right: 2rem;
   padding-left: 2rem + $timeline-line-width;

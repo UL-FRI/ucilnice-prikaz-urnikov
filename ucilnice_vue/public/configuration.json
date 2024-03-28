@@ -1,0 +1,16 @@
+{
+  "refreshIntervalsInMinutes": {
+    "configuration": 5,
+    "reservations": 5,
+    "teachers": 1440,
+    "classrooms": 1440,
+    "page": 1440
+  },
+  "darkMode": {
+    "start": 1140,
+    "end": 360
+  },
+  "apiUrl": "https://rezervacije.fri.uni-lj.si",
+  "locale": "sl-SI",
+  "beautifyReservations": true
+}

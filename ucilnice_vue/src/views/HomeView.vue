@@ -7,14 +7,19 @@ import PageFooter from '../components/PageFooter.vue';
 import SideTimeline from '../components/SideTimeline.vue';
 import { useClassroomStore } from '../stores/classroom';
 import { useDateTimeStore } from '@/stores/dateTime';
+import { useReservationStore } from '@/stores/reservation';
+import { storeToRefs } from 'pinia';
+import { DataStatus } from '@/stores/configuration';
 
 const route = useRoute();
 const router = useRouter();
 const classroomStore = useClassroomStore();
 const dateTimeStore = useDateTimeStore();
+const reservationStore = useReservationStore();
+const { status, reservations } = storeToRefs(reservationStore);
 
 onMounted(() => {
-  const { room, simulate } = route.query;
+  const { room, simulate, speed } = route.query;
 
   const classroom = room?.toString();
 
@@ -24,7 +29,10 @@ onMounted(() => {
   }
 
   if (simulate) {
-    dateTimeStore.enableSimulation();
+    dateTimeStore.enableSimulation(
+      new Date(simulate.toString()).getTime() || new Date().getTime(),
+      speed ? parseInt(speed.toString()) : 60,
+    );
   }
 
   classroomStore.setCurrentClassroomBySlug(classroom);
@@ -35,7 +43,12 @@ onMounted(() => {
   <div class="page-wrapper">
     <main>
       <FriLogo />
-      <CurrentSubject />
+
+      <CurrentSubject v-if="status === DataStatus.loaded || reservations.length >= 1" />
+      <h1 v-else-if="status === DataStatus.loading">Nalaganje ...</h1>
+      <h1 v-else-if="status === DataStatus.error">Napaka pri nalaganju urnika</h1>
+      <h1 v-else-if="status === DataStatus.init">Inicializacija ...</h1>
+
       <PageFooter />
     </main>
     <SideTimeline />

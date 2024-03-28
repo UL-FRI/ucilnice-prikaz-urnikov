@@ -4,6 +4,7 @@
   --gray-dark: #58595b;
   --gray-light: #a7a8aa;
   --gray-lightest: #f0f0f0;
+  --gray-line: #58595b;
   --black: #000000;
   --white: #ffffff;
   --green: #00694e;
@@ -19,6 +20,7 @@ html[color-scheme="dark"]:root {
   --gray-dark: #b5b5b5;
   --gray-light: #777777;
   --gray-lightest: #151515;
+  --gray-line: #414141;
   --black: #ededed;
   --white: #0a0a0a;
   --green: #00694e;
@@ -34,6 +36,7 @@ $primary-light: var(--primary-light);
 $gray-dark: var(--gray-dark);
 $gray-light: var(--gray-light);
 $gray-lightest: var(--gray-lightest);
+$gray-line: var(--gray-line);
 $black: var(--black);
 $white: var(--white);
 $green: var(--green);
@@ -79,4 +82,11 @@ body {
     overflow: hidden;
     padding-right: 4rem;
   }
+}
+
+h1 {
+  font-size: 5rem;
+  color: $black;
+  font-weight: 700;
+  margin: 1rem 0;
 }

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import UniversityBackground from './components/UniversityBackground.vue';
+import { useThemeStore } from './stores/theme';
+
+useThemeStore();
 </script>
 
 <template>

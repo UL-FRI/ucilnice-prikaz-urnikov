@@ -117,7 +117,7 @@ watch([currentReservationIndex, currentDate, elements], recalculateBar);
 .timeline-wrapper {
   width: 45%;
   height: 100%;
-  border-left: 0.1rem solid $gray-dark;
+  border-left: 0.1rem solid $gray-line;
 
   overflow: hidden;
 }
