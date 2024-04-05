@@ -69,7 +69,8 @@ Konfiguracija je v obliki JSON objekta. Primer:
   },
   "apiUrl": "https://rezervacije.fri.uni-lj.si",
   "locale": "sl-SI",
-  "beautifyReservations": true
+  "reasonPattern": "(.*)\\s*\\((.*)\\)_(LV|AV|P)",
+  "reasonDisplayFormat": "$1 $3"
 }
 ```
 
@@ -81,5 +82,5 @@ Konfiguracija je v obliki JSON objekta. Primer:
 
 * `locale` določa jezikovno kodo, ki se uporablja za prikazovanje datuma in ure.
 
-* `beautifyReservations` določa, ali se rezervacije prikazujejo v lepši obliki tj. `Programiranje 2 LV` namesto `Programiranje 2(63278)_LV`.
+* s kombinacijo `reasonPattern` in `reasonDisplayFormat` se določi, kako se prikazuje namen rezervacije. V `reasonPattern` se določi regularni izraz, v `reasonDisplayFormat` pa se nastavi, kako se prikaže namen. Primer: `"(.*?)\\s*\\((.*)\\)_(LV|AV|P)"` in `"$1 $3"`, ki bo za namen `Programiranje 2(63278)_LV` prikazal `Programiranje 2 LV`.
 

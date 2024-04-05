@@ -83,7 +83,7 @@ watch(currentReservation, async () => {
 </script>
 <template>
   <div class="current-subject" :class="{ 'is-break': isBreak, 'fade-in': fadeIn }">
-    <p class="time">{{ timeText }}</p>
+    <p class="time" v-if="!isBreak">{{ timeText }}</p>
     <h1>{{ isBreak ? 'PROSTO' : currentReservation?.subject }}</h1>
     <h2 :class="{ 'is-break': isBreak }">{{ subText }}</h2>
     <h2 class="sub-sub-text">{{ subSubText }}</h2>
@@ -131,12 +131,16 @@ watch(currentReservation, async () => {
 
     &.is-break {
       margin-top: 3rem;
+
+      &:empty {
+        display: none;
+      }
     }
   }
 
   .sub-sub-text {
     font-weight: 600;
-    font-size: 3.5rem;
+    font-size: 4.5rem;
   }
 
   &.is-break {

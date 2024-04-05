@@ -44,9 +44,13 @@ onMounted(() => {
     <main>
       <FriLogo />
 
-      <CurrentSubject v-if="status === DataStatus.loaded || reservations.length >= 1" />
+      <CurrentSubject
+        v-if="
+          status === DataStatus.loaded || status === DataStatus.updating || reservations.length >= 1
+        "
+      />
       <h1 v-else-if="status === DataStatus.loading">Nalaganje ...</h1>
-      <h1 v-else-if="status === DataStatus.error">Napaka pri nalaganju urnika</h1>
+      <h1 v-else-if="status === DataStatus.error">Napaka pri pridobivanju podatkov</h1>
       <h1 v-else-if="status === DataStatus.init">Inicializacija ...</h1>
 
       <PageFooter />

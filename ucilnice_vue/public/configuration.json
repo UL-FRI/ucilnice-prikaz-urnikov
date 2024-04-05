@@ -12,5 +12,6 @@
   },
   "apiUrl": "https://rezervacije.fri.uni-lj.si",
   "locale": "sl-SI",
-  "beautifyReservations": true
+  "reasonPattern": "(.*)\\s*\\((.*)\\)_(LV|AV|P)",
+  "reasonDisplayFormat": "$1 $3"
 }

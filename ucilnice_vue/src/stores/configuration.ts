@@ -6,6 +6,7 @@ import { onMounted, ref } from 'vue';
 export enum DataStatus {
   init,
   loading,
+  updating,
   loaded,
   error,
 }
@@ -17,7 +18,8 @@ export interface Interval {
 
 export const useConfigurationStore = defineStore('configuration', () => {
   const locale = ref('sl-SI');
-  const beautifyReservations = ref(true);
+  const reasonPattern = ref('(.*)\\s*\\((.*)\\)_(LV|AV|P)');
+  const reasonDisplayFormat = ref('$1 $3');
 
   const apiUrl = ref('');
   const breakSlug = ref('');
@@ -41,7 +43,7 @@ export const useConfigurationStore = defineStore('configuration', () => {
   let pageReloadInterval: number | null = null;
 
   const refreshConfiguration = async () => {
-    const { data } = await axios.get('/configuration.json');
+    const { data } = await axios.get(`${import.meta.env.BASE_URL}/configuration.json`);
 
     const newData = JSON.stringify(data);
 
@@ -53,7 +55,8 @@ export const useConfigurationStore = defineStore('configuration', () => {
     lastConfigurationUpdate.value = new Date();
 
     locale.value = data.locale;
-    beautifyReservations.value = data.beautifyReservations;
+    reasonPattern.value = data.reasonPattern;
+    reasonDisplayFormat.value = data.reasonDisplayFormat;
 
     apiUrl.value = data.apiUrl;
     breakSlug.value = data.breakSlug;
@@ -96,7 +99,8 @@ export const useConfigurationStore = defineStore('configuration', () => {
 
   return {
     locale,
-    beautifyReservations,
+    reasonPattern,
+    reasonDisplayFormat,
     apiUrl,
     breakSlug,
     configurationRefreshFrequency,

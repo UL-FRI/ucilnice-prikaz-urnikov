@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import TimelineItem from './TimelineItem.vue';
 import { useReservationStore } from '@/stores/reservation';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useDateTimeStore } from '@/stores/dateTime';
 
 const dateTimeStore = useDateTimeStore();
@@ -24,6 +24,12 @@ let scrollInterval: number | null = null;
 
 onMounted(() => {
   recalculateBar();
+
+  window.addEventListener('resize', recalculateBar);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', recalculateBar);
 });
 
 const checkOverflows = () => {

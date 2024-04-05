@@ -16,8 +16,13 @@ export interface Reservation {
 
 export const useReservationStore = defineStore('reservationStore', () => {
   const configurationStore = useConfigurationStore();
-  const { breakSlug, lastConfigurationUpdate, reservationsRefreshFrequency } =
-    storeToRefs(configurationStore);
+  const {
+    breakSlug,
+    lastConfigurationUpdate,
+    reservationsRefreshFrequency,
+    reasonPattern,
+    reasonDisplayFormat,
+  } = storeToRefs(configurationStore);
 
   const dateTimeStore = useDateTimeStore();
   const { currentDate, currentDateTime } = storeToRefs(dateTimeStore);
@@ -50,17 +55,20 @@ export const useReservationStore = defineStore('reservationStore', () => {
   });
 
   watch([currentClassroomId, currentDate], () => {
+    reservations.value = [];
+    status.value = DataStatus.init;
     fetchData();
   });
 
-  const beautifyReservationReason = (title: string) => title.replace(/\(.*\)_(LV|AV|P)/g, ' $1');
+  const beautifyReservationReason = (title: string) =>
+    title.replace(RegExp(reasonPattern.value, 'g'), reasonDisplayFormat.value);
 
   const fetchData = async () => {
     if (!currentClassroomId.value) {
       return;
     }
 
-    status.value = DataStatus.loading;
+    status.value = status.value === DataStatus.loaded ? DataStatus.updating : DataStatus.loading;
 
     const start = currentDate.value.toISOString();
     const end = new Date(currentDate.value.getTime() + 24 * 60 * 60 * 1000).toISOString();
@@ -91,6 +99,7 @@ export const useReservationStore = defineStore('reservationStore', () => {
 
       status.value = DataStatus.loaded;
     } catch (error) {
+      reservations.value = reservations.value.filter((r) => r.end > currentDate.value);
       status.value = DataStatus.error;
     }
   };
