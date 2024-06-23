@@ -87,7 +87,7 @@ export const useReservationStore = defineStore('reservationStore', () => {
 
       const parsedData: Reservation[] = data.results.map((r) => ({
         subject: beautifyReservationReason(r.reason),
-        teacherIds: [...r.owners.map((o) => o.id), ...r.reservables.map((r) => r)],
+        teacherIds: [...r.owners, ...r.reservables],
         start: new Date(r.start),
         end: new Date(r.end),
         classrooms: [],

@@ -123,9 +123,17 @@ watch([currentReservationIndex, currentDate, elements], recalculateBar);
 .timeline-wrapper {
   width: 45%;
   height: 100%;
-  border-left: 0.1rem solid $gray-line;
-
   overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 2rem;
+    bottom: 2rem;
+    left: 0;
+    border-left: 0.1rem solid $gray-line;
+  }
 }
 
 .timeline {
@@ -145,7 +153,7 @@ watch([currentReservationIndex, currentDate, elements], recalculateBar);
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  padding: 1rem 0;
+  padding: 3rem 0;
   min-height: 100%;
   overflow: visible;
 }

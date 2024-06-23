@@ -11,7 +11,7 @@ export interface ReservationsApiReservation {
   reason: string;
   start: string;
   end: string;
-  owners: any[];
+  owners: number[];
   reservables: number[];
   requirements: any[];
   id: number;

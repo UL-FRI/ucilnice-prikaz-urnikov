@@ -139,7 +139,7 @@ watch(currentReservation, async () => {
   }
 
   .sub-sub-text {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 4.5rem;
   }
 

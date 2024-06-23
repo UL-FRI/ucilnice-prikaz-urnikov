@@ -59,21 +59,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style lang="scss" scoped>
-.page-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2rem 0 2rem 4rem;
-  height: 100vh;
-}
-main {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  overflow: hidden;
-  padding-right: 4rem;
-}
-</style>
+<style lang="scss" scoped></style>
