@@ -5,6 +5,7 @@ import { onMounted, ref } from 'vue';
 
 export enum DataStatus {
   init,
+  classroomDiscovery,
   loading,
   updating,
   loaded,
@@ -23,6 +24,9 @@ export const useConfigurationStore = defineStore('configuration', () => {
 
   const apiUrl = ref('');
   const breakSlug = ref('');
+
+  const ipUrl = ref('');
+  const classroomIpMappings = ref<{ [key: string]: string }>({});
 
   // Refresh frequencies in minutes
   const configurationRefreshFrequency = ref(10);
@@ -43,7 +47,7 @@ export const useConfigurationStore = defineStore('configuration', () => {
   let pageReloadInterval: number | null = null;
 
   const refreshConfiguration = async () => {
-    const { data } = await axios.get(`${import.meta.env.BASE_URL}/configuration.json`);
+    const { data } = await axios.get(`${import.meta.env.BASE_URL}configuration.json`);
 
     const newData = JSON.stringify(data);
 
@@ -62,6 +66,8 @@ export const useConfigurationStore = defineStore('configuration', () => {
     breakSlug.value = data.breakSlug;
     darkModeStart.value = data.darkMode.start;
     darkModeEnd.value = data.darkMode.end;
+    ipUrl.value = data.ipUrl;
+    classroomIpMappings.value = data.classroomIpMappings;
 
     const intervals = data.refreshIntervalsInMinutes;
 
@@ -110,6 +116,8 @@ export const useConfigurationStore = defineStore('configuration', () => {
     pageRefreshFrequency,
     darkModeStart,
     darkModeEnd,
+    ipUrl,
+    classroomIpMappings,
     lastConfigurationUpdate,
   };
 });

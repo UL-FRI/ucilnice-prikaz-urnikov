@@ -18,15 +18,8 @@ const dateTimeStore = useDateTimeStore();
 const reservationStore = useReservationStore();
 const { status, reservations } = storeToRefs(reservationStore);
 
-onMounted(() => {
+onMounted(async () => {
   const { room, simulate, speed } = route.query;
-
-  const classroom = room?.toString();
-
-  if (!classroom) {
-    router.push({ name: 'SelectClassroom' });
-    return;
-  }
 
   if (simulate) {
     dateTimeStore.enableSimulation(
@@ -35,7 +28,21 @@ onMounted(() => {
     );
   }
 
-  classroomStore.setCurrentClassroomBySlug(classroom);
+  const classroom = room?.toString();
+
+  if (classroom) {
+    classroomStore.setCurrentClassroomBySlug(classroom);
+  } else {
+    status.value = DataStatus.classroomDiscovery;
+
+    const autoConfigureResult = await classroomStore.autoConfigureClassroom();
+
+    status.value = DataStatus.init;
+
+    if (!autoConfigureResult) {
+      router.push({ name: 'SelectClassroom' });
+    }
+  }
 });
 </script>
 
@@ -51,6 +58,7 @@ onMounted(() => {
       />
       <h1 v-else-if="status === DataStatus.loading">Nalaganje ...</h1>
       <h1 v-else-if="status === DataStatus.error">Napaka pri pridobivanju podatkov</h1>
+      <h1 v-else-if="status === DataStatus.classroomDiscovery">Prepoznavanje učilnice ...</h1>
       <h1 v-else-if="status === DataStatus.init">Inicializacija ...</h1>
 
       <PageFooter />

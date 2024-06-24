@@ -70,7 +70,13 @@ Konfiguracija je v obliki JSON objekta. Primer:
   "apiUrl": "https://rezervacije.fri.uni-lj.si",
   "locale": "sl-SI",
   "reasonPattern": "(.*)\\s*\\((.*)\\)_(LV|AV|P)",
-  "reasonDisplayFormat": "$1 $3"
+  "reasonDisplayFormat": "$1 $3",
+  "ipUrl": "http://localhost/demo6.4.2/myip.php",
+  "classroomIpMappings": {
+    "192.168.1.101": "P01",
+    "192.168.1.102": "P02",
+    "192.168.1.103": "P03",
+  }
 }
 ```
 
@@ -84,3 +90,9 @@ Konfiguracija je v obliki JSON objekta. Primer:
 
 * s kombinacijo `reasonPattern` in `reasonDisplayFormat` se določi, kako se prikazuje namen rezervacije. V `reasonPattern` se določi regularni izraz, v `reasonDisplayFormat` pa se nastavi, kako se prikaže namen. Primer: `"(.*?)\\s*\\((.*)\\)_(LV|AV|P)"` in `"$1 $3"`, ki bo za namen `Programiranje 2(63278)_LV` prikazal `Programiranje 2 LV`.
 
+* `ipUrl` določa naslov strežnika, s katerega se pridobiva IP naslov odjemalca. Uporablja se za določanje predavalnice glede na IP naslov. Pričakuje se odgovor v obliki: 
+  ```json
+  {"ip": "192.168.1.101"}
+  ```
+
+* `classroomIpMappings` določa preslikavo med IP naslovi in predavalnicami.

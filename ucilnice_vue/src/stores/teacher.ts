@@ -18,7 +18,6 @@ export const useTeacherStore = defineStore('teacherStore', () => {
   let refreshInterval: number | null = null;
 
   onMounted(async () => {
-    await fetchData();
     setRefreshInterval();
   });
 

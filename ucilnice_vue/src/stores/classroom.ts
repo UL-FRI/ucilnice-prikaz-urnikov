@@ -16,7 +16,8 @@ export const useClassroomStore = defineStore('classroomStore', () => {
   const currentClassroomSlug = ref<string | null>(null);
 
   const configurationStore = useConfigurationStore();
-  const { lastConfigurationUpdate, classroomsRefreshFrequency } = storeToRefs(configurationStore);
+  const { lastConfigurationUpdate, classroomsRefreshFrequency, ipUrl, classroomIpMappings } =
+    storeToRefs(configurationStore);
 
   let refreshInterval: number | null = null;
 
@@ -70,6 +71,18 @@ export const useClassroomStore = defineStore('classroomStore', () => {
     classrooms.value = newData;
   };
 
+  const autoConfigureClassroom = async () => {
+    const { data } = await api.get(ipUrl.value);
+
+    const classromSlug = classroomIpMappings.value[data.ip];
+
+    if (classromSlug) {
+      setCurrentClassroomBySlug(classromSlug);
+    }
+
+    return classromSlug;
+  };
+
   return {
     classrooms,
     fetchData,
@@ -77,5 +90,6 @@ export const useClassroomStore = defineStore('classroomStore', () => {
     currentClassroom,
     setCurrentClassroomBySlug,
     currentClassroomId,
+    autoConfigureClassroom,
   };
 });
