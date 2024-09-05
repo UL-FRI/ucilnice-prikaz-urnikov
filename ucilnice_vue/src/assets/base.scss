@@ -1,0 +1,118 @@
+:root {
+  --primary: #e03127;
+  --primary-light: #e0312714;
+  --gray-dark: #58595b;
+  --gray-light: #a7a8aa;
+  --gray-lightest: #f0f0f0;
+  --gray-line: #58595b;
+  --black: #000000;
+  --white: #ffffff;
+  --green: #00694e;
+  --green-light: #00694e14;
+  --university-color: #f8f8f8;
+  --logo-red: var(--primary);
+  --logo-gray: var(--gray-dark);
+}
+
+html[color-scheme="dark"]:root {
+  --primary: #e03127;
+  --primary-light: #e0312714;
+  --gray-dark: #b5b5b5;
+  --gray-light: #777777;
+  --gray-lightest: #151515;
+  --gray-line: #414141;
+  --black: #ededed;
+  --white: #0a0a0a;
+  --green: #00694e;
+  --green-light: #01cd9a14;
+  --university-color: #101010;
+  --logo-red: #ffffff;
+  --logo-gray: #ffffff;
+}
+
+
+$primary: var(--primary);
+$primary-light: var(--primary-light);
+$gray-dark: var(--gray-dark);
+$gray-light: var(--gray-light);
+$gray-lightest: var(--gray-lightest);
+$gray-line: var(--gray-line);
+$black: var(--black);
+$white: var(--white);
+$green: var(--green);
+$green-light: var(--green-light);
+$university-color: var(--university-color);
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+  transition: fill 0.3s, background 0.3s;
+}
+
+html {
+  font-size: 16px;
+  background-color: $white;
+  color: $black;
+}
+
+body {
+  min-height: 100vh;
+  font-family: 'Univerza Sans', Arial, Helvetica, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.page-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+
+  main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    overflow: hidden;
+    padding: 2rem 4rem;
+  }
+}
+
+h1 {
+  font-size: 5rem;
+  color: $black;
+  font-weight: 700;
+  margin: 1rem 0;
+}
+
+@font-face {
+  font-family: 'Univerza Sans';
+  font-weight: 400;
+  font-style: normal;
+  font-display: auto;
+  unicode-range: U+000-5FF;
+  src: url('./fonts/UniverzaSans-Regular.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Univerza Sans';
+  font-weight: 500;
+  font-style: normal;
+  font-display: auto;
+  unicode-range: U+000-5FF;
+  src: url('./fonts/UniverzaSans-Medium.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Univerza Sans';
+  font-weight: 700;
+  font-style: normal;
+  font-display: auto;
+  unicode-range: U+000-5FF;
+  src: url('./fonts/UniverzaSans-Bold.otf') format('opentype');
+}
