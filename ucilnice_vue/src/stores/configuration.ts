@@ -1,11 +1,12 @@
 import api from '@/helpers/api';
 import axios from 'axios';
 import { defineStore } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
 export enum DataStatus {
   init,
   classroomDiscovery,
+  classroomNotDiscovered,
   loading,
   updating,
   loaded,
@@ -99,11 +100,8 @@ export const useConfigurationStore = defineStore('configuration', () => {
     location.reload();
   };
 
-  onMounted(() => {
-    refreshConfiguration();
-  });
-
   return {
+    refreshConfiguration,
     locale,
     reasonPattern,
     reasonDisplayFormat,

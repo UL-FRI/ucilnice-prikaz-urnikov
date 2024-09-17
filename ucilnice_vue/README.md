@@ -14,11 +14,17 @@ npm install
 npm run dev
 ```
 
+Aplikacija je dostopna na naslovu [http://localhost:8080](http://localhost:8080).
+
 ### Pripravi za produkcijo
 
 ```sh
 npm run build
 ```
+
+Aplikacija bo pripravljena v mapi `dist`. Slednjo je potrebno le skopirati na spletni strežnik.
+
+Zaradi samodejne prepoznave predavalnice glede na IP naslov odjemalca, je potrebno aplikacijo ali pa vsaj datoteko `ip.php` postaviti na strežnik, ki podpira PHP. Če se uporablja drug strežnik, oziroma če datoteka ne bo dostopna v istem imeniku kot aplikacija, je potrebno spremeniti vrednost `ipUrl` v datoteki `configuration.json` na ustrezen naslov, ki bo dostopen odjemalcem. Več o konfiguraciji je opisano v nadaljevanju.
 
 ali 
 
@@ -26,15 +32,13 @@ ali
 docker compose up
 ```
 
-### Ogled aplikacije
-
 Aplikacija je dostopna na naslovu [http://localhost:8080](http://localhost:8080).
 
 ### Dodatne nastavitve
 
 #### Izbor predavalnice
 
-Da bi nastavili predavalnico brez ročnega izbora, je potrebno v URL dodati parameter `room`.
+Da bi nastavili predavalnico brez ročnega izbora, je potrebno v URL dodati parameter `room`. To se uporablja le za testiranje, saj se predavalnica samodejno izbere glede na IP naslov odjemalca (več o tem v razdelku "Konfiguracija").
 
 Primer: [http://localhost:8080?room=P01](http://localhost:8080?room=R01).
 
@@ -71,7 +75,7 @@ Konfiguracija je v obliki JSON objekta. Primer:
   "locale": "sl-SI",
   "reasonPattern": "(.*)\\s*\\((.*)\\)_(LV|AV|P)",
   "reasonDisplayFormat": "$1 $3",
-  "ipUrl": "http://localhost/demo6.4.2/myip.php",
+  "ipUrl": "ip.php",
   "classroomIpMappings": {
     "192.168.1.101": "P01",
     "192.168.1.102": "P02",
@@ -84,7 +88,7 @@ Konfiguracija je v obliki JSON objekta. Primer:
 
 * `darkMode` določa časovni interval, ko je vklopljen temni način. Čas je podan v minutah od začetka dneva. Za izklop temnega načina nastavite vsaj eno vrednost na `-1`.
 
-* `apiUrl` določa naslov strežnika, s katerega se pridobivajo podatki.
+* `apiUrl` določa naslov strežnika, s katerega se pridobivajo podatki o rezervacijah, profesorjih in predavalnicah.
 
 * `locale` določa jezikovno kodo, ki se uporablja za prikazovanje datuma in ure.
 

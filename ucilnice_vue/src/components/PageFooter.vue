@@ -17,17 +17,27 @@ const { currentClassroom } = storeToRefs(classroomStore);
 
 const reservationStore = useReservationStore();
 const { status } = storeToRefs(reservationStore);
+
+const emit = defineEmits(['showPicker']);
 </script>
 
 <template>
   <div class="footer-wrapper">
     <div class="footer">
-      <div class="error" v-if="status == DataStatus.error">!</div>
+      <div class="error" v-if="status === DataStatus.error">!</div>
       <div class="classroom">{{ currentClassroom?.slug }}</div>
       <div class="datetime">
         <div class="time">{{ currentTime }}</div>
         <div class="date">{{ currentDate }}</div>
       </div>
+      <button
+        style="margin-left: auto"
+        v-if="status === DataStatus.classroomDiscovery"
+        class="show-picker-button"
+        @click="emit('showPicker')"
+      >
+        Ročen izbor učilnice
+      </button>
     </div>
   </div>
 </template>
@@ -44,6 +54,7 @@ const { status } = storeToRefs(reservationStore);
     display: flex;
     align-items: center;
     color: $gray-dark;
+    width: 100%;
 
     .error {
       font-size: 3rem;
@@ -73,6 +84,18 @@ const { status } = storeToRefs(reservationStore);
         font-size: 1.75rem;
       }
     }
+  }
+}
+
+.show-picker-button {
+  border: none;
+  background: transparent;
+  color: $gray-dark;
+  font-size: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 </style>

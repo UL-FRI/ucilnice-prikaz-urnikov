@@ -25,7 +25,7 @@ smo velik del funkcionalnosti originalne aplikacije izrezali. Nastale statične 
 
 ## ucilnice_vue
 
-Z letom 2024 Univerza v Ljubljani uporablja novo grafično podobo. Aplikacija je v ta namen prenovljena in napisana z uporabo `Vue.js`. 
+Z letom 2024 Univerza v Ljubljani uporablja novo grafično podobo. Aplikacija je v ta namen prenovljena in napisana z uporabo `Vue.js`. Več o njej je na voljo tukaj: [ucilnice_vue/README.md](ucilnice_vue/README.md).
 
 # Licensing
 
