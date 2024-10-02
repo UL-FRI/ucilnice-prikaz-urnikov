@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useConfigurationStore } from './configuration';
 import api from '@/helpers/api';
 import type { ReservationsApiClassroomsResponse } from '@/helpers/api.d';
+import axios from 'axios';
 
 export interface Classroom {
   id: number;
@@ -72,15 +73,26 @@ export const useClassroomStore = defineStore('classroomStore', () => {
   };
 
   const autoConfigureClassroom = async () => {
-    const { data } = await api.get(ipUrl.value);
+    console.log(`Auto configuring classroom: "${ipUrl.value}" ...`);
+    try {
+      const { data } = await axios.get(ipUrl.value, {
+        timeout: 30 * 1000,
+      });
+      console.log('IP data:', data);
 
-    const classromSlug = classroomIpMappings.value[data.ip];
+      const classroomSlug = classroomIpMappings.value[data.ip];
 
-    if (classromSlug) {
-      setCurrentClassroomBySlug(classromSlug);
+      console.log('Classroom slug:', classroomSlug);
+
+      if (classroomSlug) {
+        setCurrentClassroomBySlug(classroomSlug);
+      }
+
+      return classroomSlug;
+    } catch (error) {
+      console.error('Failed to auto configure classroom:', error);
+      return false;
     }
-
-    return classromSlug;
   };
 
   return {

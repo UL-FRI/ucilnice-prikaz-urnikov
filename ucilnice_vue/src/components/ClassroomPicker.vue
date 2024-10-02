@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import FriLogo from '../components/FriLogo.vue';
 import { useClassroomStore } from '../stores/classroom';
 import { computed, ref } from 'vue';
 
@@ -21,40 +20,37 @@ const filteredClassrooms = computed(() => {
     .sort((a, b) => a.sortName.localeCompare(b.sortName));
 });
 
+function selectClassroom(classroomSlug: string) {
+  window.location.href = `?room=${classroomSlug}`;
+}
+
 const searchQuery = ref('');
 </script>
 
 <template>
-  <main>
-    <FriLogo />
-    <h1>Učilnice</h1>
+  <div class="classroom-picker">
     <input type="text" v-model="searchQuery" placeholder="Išči..." autofocus />
     <div class="grid">
-      <router-link
-        :to="{ name: 'HomeView', query: { room: classroom.slug } }"
+      <button
         v-for="classroom in filteredClassrooms"
         :key="classroom.id"
         class="classroom-card"
+        @click="selectClassroom(classroom.slug ?? '')"
       >
         <h2>{{ classroom.slug }}</h2>
         <p>{{ classroom.name }}</p>
-      </router-link>
+      </button>
     </div>
-  </main>
+  </div>
 </template>
 
 <style lang="scss" scoped>
 @import '@/assets/base.scss';
 
-main {
-  padding: 4rem;
-}
-
-h1 {
-  font-size: 4rem;
-  color: $black;
-  font-weight: 700;
-  margin: 1rem 0;
+.classroom-picker {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 input {
@@ -74,6 +70,8 @@ input {
   gap: 1rem;
   padding: 0;
   margin: 0;
+  height: 100%;
+  overflow: auto;
 }
 
 .classroom-card {
@@ -90,6 +88,8 @@ input {
   text-decoration: none;
   color: $black;
   background-color: $gray-lightest;
+  border: none;
+  text-align: left;
 
   &:hover {
     background-color: $primary;
