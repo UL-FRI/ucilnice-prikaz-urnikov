@@ -75,7 +75,7 @@ export const useReservationStore = defineStore('reservationStore', () => {
 
     try {
       const response = await api.get(
-        `/reservations/?start=${start}&end=${end}&reservables=${currentClassroomId.value}&format=json`,
+        `/reservations/?start__gt=${start}&end__lt=${end}&reservables=${currentClassroomId.value}&format=json`,
       );
 
       const data = response.data as ReservationsApiReservationsResponse;

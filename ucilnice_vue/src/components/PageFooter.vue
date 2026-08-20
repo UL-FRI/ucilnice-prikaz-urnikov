@@ -36,7 +36,7 @@ const emit = defineEmits(['showPicker']);
         class="show-picker-button"
         @click="emit('showPicker')"
       >
-        Ročen izbor učilnice
+        Ročni izbor učilnice
       </button>
     </div>
   </div>

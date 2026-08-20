@@ -73,6 +73,10 @@ export const useClassroomStore = defineStore('classroomStore', () => {
   };
 
   const autoConfigureClassroom = async () => {
+    if (!ipUrl.value) {
+      console.log('ipUrl is not set, skipping auto configuration');
+      return false;
+    }
     console.log(`Auto configuring classroom: "${ipUrl.value}" ...`);
     try {
       const { data } = await axios.get(ipUrl.value, {
